@@ -37,3 +37,5 @@ for linha in matrizcusto:
     print(linha)
 
 print(f"\n")
+
+# comentario para dar commit 
