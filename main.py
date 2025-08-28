@@ -1,5 +1,8 @@
 import random
 
+import networkx as nx
+import matplotlib.pyplot as plt
+
 n = random.choice([10,50,100]) #Sorteia o numero de vértices
 print(f"numero sorteado {n}") 
 
@@ -81,8 +84,61 @@ def dijkstra(matrizcusto, origem):
     return melhorCaminho #retorna o vetor com os melhores caminhos
 
 # Exemplo: origem = 0
-origem = 5
+origem = 0
 resultado = dijkstra(matrizcusto, origem)
 
 print(f"\nMenores caminhos a partir do vértice {origem}:")
 print(resultado)
+
+#####################################################
+################### Desenha Grafo ###################
+#####################################################
+# Cria grafo
+G = nx.Graph()
+for i in range(n):
+    G.add_node(i)
+for i in range(n):
+    for j in range(i+1, n):
+        if matrizadjacencia[i][j] == 1:
+            G.add_edge(i, j, weight=matrizcusto[i][j])
+
+# Função para recuperar o caminho mínimo de Dijkstra 
+def recuperar_caminho(matrizcusto, origem, destino, melhorCaminho):
+    n = len(matrizcusto)
+    caminho = [destino]
+    atual = destino
+    while atual != origem:
+        for vizinho in range(n):
+            if matrizadjacencia[atual][vizinho] == 1:
+                if melhorCaminho[atual] == melhorCaminho[vizinho] + matrizcusto[vizinho][atual]:
+                    caminho.append(vizinho)
+                    atual = vizinho
+                    break
+    caminho.reverse()
+    return caminho
+
+# Cria lista de arestas do caminho mínimo
+arestas_caminho = []
+for destino in range(n):
+    if destino != origem:
+        caminho = recuperar_caminho(matrizcusto, origem, destino, resultado)
+        for i in range(len(caminho)-1):
+            arestas_caminho.append((caminho[i], caminho[i+1]))
+
+# Posições dos nós
+pos = nx.spring_layout(G)
+
+# Desenha nós
+nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=700, font_size=10)
+
+# Desenha todas as arestas em cinza
+nx.draw_networkx_edges(G, pos, width=1, edge_color='gray')
+
+# Desenha as arestas do caminho mínimo em vermelho
+nx.draw_networkx_edges(G, pos, edgelist=arestas_caminho, width=2, edge_color='red')
+
+# Mostra os pesos
+edge_labels = nx.get_edge_attributes(G, 'weight')
+nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+
+plt.show()
